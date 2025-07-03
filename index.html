@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesh Price Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .calculator {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .cost-breakdown {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #e0e6ed;
+        }
+
+        .cost-breakdown h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            text-align: center;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #2c3e50;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .breakdown-label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .breakdown-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .final-price {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .final-price h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .final-price .price {
+            font-size: 3em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .currency {
+            font-size: 0.7em;
+            opacity: 0.9;
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .calculator {
+                padding: 20px;
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .header p {
+                font-size: 1em;
+            }
+            
+            .final-price .price {
+                font-size: 2.5em;
+            }
+            
+            .cost-breakdown {
+                padding: 15px;
+            }
+            
+            .breakdown-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .breakdown-item:last-child {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .calculator {
+                padding: 15px;
+                margin: 5px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .header p {
+                font-size: 0.9em;
+            }
+            
+            input[type="number"] {
+                padding: 10px 12px;
+                font-size: 1em;
+            }
+            
+            .input-with-symbol input {
+                padding-left: 30px;
+            }
+            
+            .percentage-input input {
+                padding-right: 30px;
+            }
+            
+            .input-with-symbol::before {
+                left: 12px;
+                font-size: 0.9em;
+            }
+            
+            .percentage-input::after {
+                right: 12px;
+                font-size: 0.9em;
+            }
+            
+            .final-price .price {
+                font-size: 2em;
+            }
+            
+            .final-price h2 {
+                font-size: 1.5em;
+            }
+            
+            .cost-breakdown {
+                padding: 12px;
+            }
+            
+            .cost-breakdown h3 {
+                font-size: 1.1em;
+            }
+            
+            .breakdown-item {
+                padding: 6px 0;
+                font-size: 0.9em;
+            }
+            
+            .breakdown-item:last-child {
+                padding: 10px;
+                font-size: 1em;
+            }
+            
+            .reset-btn {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+            
+            label {
+                font-size: 1em;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .calculator {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .final-price .price {
+                font-size: 1.8em;
+            }
+            
+            .grid {
+                gap: 10px;
+            }
+        }
+
+        .input-with-symbol {
+            position: relative;
+        }
+
+        .input-with-symbol::before {
+            content: '₹';
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-weight: bold;
+            z-index: 2;
+        }
+
+        .input-with-symbol input {
+            padding-left: 35px;
+        }
+
+        .percentage-input::after {
+            content: '%';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-weight: bold;
+            z-index: 2;
+        }
+
+        .percentage-input input {
+            padding-right: 35px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="header">
+            <h1>Meesho Price Calculator</h1>
+            <p>Calculate your Meesho pricing with all cost components</p>
+        </div>
+
+        <form id="meshCalculator">
+            <div class="grid">
+                <div class="form-group">
+                    <label for="meshCost">Cost of Product</label>
+                    <div class="input-with-symbol">
+                        <input type="number" id="meshCost" step="0.01" min="0" value="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="transportCost">Transport Cost</label>
+                    <div class="input-with-symbol">
+                        <input type="number" id="transportCost" step="0.01" min="0" value="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="labourCost">Labour Cost</label>
+                    <div class="input-with-symbol">
+                        <input type="number" id="labourCost" step="0.01" min="0" value="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="packingCost">Packing Cost</label>
+                    <div class="input-with-symbol">
+                        <input type="number" id="packingCost" step="0.01" min="0" value="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="adsCost">Advertisement Cost</label>
+                    <div class="input-with-symbol">
+                        <input type="number" id="adsCost" step="0.01" min="0" value="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="otherCost">Other Costs</label>
+                    <div class="input-with-symbol">
+                        <input type="number" id="otherCost" step="0.01" min="0" value="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="gstRate">GST Rate (%)</label>
+                    <div class="percentage-input">
+                        <input type="number" id="gstRate" step="0.01" min="0" max="100" value="18">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="profitMargin">Profit Margin (%)</label>
+                    <div class="percentage-input">
+                        <input type="number" id="profitMargin" step="0.01" min="0" value="20">
+                    </div>
+                </div>
+            </div>
+
+            <div class="cost-breakdown">
+                <h3>📊 Cost Breakdown</h3>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Base Mesh Cost:</span>
+                    <span class="breakdown-value" id="displayMeshCost">₹0.00</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Transport Cost:</span>
+                    <span class="breakdown-value" id="displayTransportCost">₹0.00</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Labour Cost:</span>
+                    <span class="breakdown-value" id="displayLabourCost">₹0.00</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Packing Cost:</span>
+                    <span class="breakdown-value" id="displayPackingCost">₹0.00</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Advertisement Cost:</span>
+                    <span class="breakdown-value" id="displayAdsCost">₹0.00</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Other Costs:</span>
+                    <span class="breakdown-value" id="displayOtherCost">₹0.00</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Subtotal:</span>
+                    <span class="breakdown-value" id="displaySubtotal">₹0.00</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Profit Amount:</span>
+                    <span class="breakdown-value" id="displayProfitAmount">₹0.00</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Before GST:</span>
+                    <span class="breakdown-value" id="displayBeforeGst">₹0.00</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">GST Amount:</span>
+                    <span class="breakdown-value" id="displayGstAmount">₹0.00</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">🎯 FINAL PRICE:</span>
+                    <span class="breakdown-value" id="displayFinalPrice">₹0.00</span>
+                </div>
+            </div>
+
+            <div class="final-price">
+                <h2>Final Selling Price</h2>
+                <div class="price">
+                    <span class="currency">₹</span><span id="finalPriceDisplay">0.00</span>
+                </div>
+            </div>
+
+            <button type="button" class="reset-btn" onclick="resetCalculator()">🔄 Reset Calculator</button>
+        </form>
+    </div>
+
+    <script>
+        // Store all input elements
+        const inputs = {
+            meshCost: document.getElementById('meshCost'),
+            transportCost: document.getElementById('transportCost'),
+            labourCost: document.getElementById('labourCost'),
+            packingCost: document.getElementById('packingCost'),
+            adsCost: document.getElementById('adsCost'),
+            otherCost: document.getElementById('otherCost'),
+            gstRate: document.getElementById('gstRate'),
+            profitMargin: document.getElementById('profitMargin')
+        };
+
+        // Store all display elements
+        const displays = {
+            meshCost: document.getElementById('displayMeshCost'),
+            transportCost: document.getElementById('displayTransportCost'),
+            labourCost: document.getElementById('displayLabourCost'),
+            packingCost: document.getElementById('displayPackingCost'),
+            adsCost: document.getElementById('displayAdsCost'),
+            otherCost: document.getElementById('displayOtherCost'),
+            subtotal: document.getElementById('displaySubtotal'),
+            profitAmount: document.getElementById('displayProfitAmount'),
+            beforeGst: document.getElementById('displayBeforeGst'),
+            gstAmount: document.getElementById('displayGstAmount'),
+            finalPrice: document.getElementById('displayFinalPrice'),
+            finalPriceDisplay: document.getElementById('finalPriceDisplay')
+        };
+
+        // Format currency
+        function formatCurrency(amount) {
+            return `₹${amount.toFixed(2)}`;
+        }
+
+        // Calculate and update display
+        function calculatePrice() {
+            // Get all input values
+            const meshCost = parseFloat(inputs.meshCost.value) || 0;
+            const transportCost = parseFloat(inputs.transportCost.value) || 0;
+            const labourCost = parseFloat(inputs.labourCost.value) || 0;
+            const packingCost = parseFloat(inputs.packingCost.value) || 0;
+            const adsCost = parseFloat(inputs.adsCost.value) || 0;
+            const otherCost = parseFloat(inputs.otherCost.value) || 0;
+            const gstRate = parseFloat(inputs.gstRate.value) || 0;
+            const profitMargin = parseFloat(inputs.profitMargin.value) || 0;
+
+            // Calculate subtotal (all costs)
+            const subtotal = meshCost + transportCost + labourCost + packingCost + adsCost + otherCost;
+
+            // Calculate profit amount
+            const profitAmount = (subtotal * profitMargin) / 100;
+
+            // Calculate price before GST
+            const beforeGst = subtotal + profitAmount;
+
+            // Calculate GST amount
+            const gstAmount = (beforeGst * gstRate) / 100;
+
+            // Calculate final price
+            const finalPrice = beforeGst + gstAmount;
+
+            // Update all displays
+            displays.meshCost.textContent = formatCurrency(meshCost);
+            displays.transportCost.textContent = formatCurrency(transportCost);
+            displays.labourCost.textContent = formatCurrency(labourCost);
+            displays.packingCost.textContent = formatCurrency(packingCost);
+            displays.adsCost.textContent = formatCurrency(adsCost);
+            displays.otherCost.textContent = formatCurrency(otherCost);
+            displays.subtotal.textContent = formatCurrency(subtotal);
+            displays.profitAmount.textContent = formatCurrency(profitAmount);
+            displays.beforeGst.textContent = formatCurrency(beforeGst);
+            displays.gstAmount.textContent = formatCurrency(gstAmount);
+            displays.finalPrice.textContent = formatCurrency(finalPrice);
+            displays.finalPriceDisplay.textContent = finalPrice.toFixed(2);
+        }
+
+        // Reset calculator
+        function resetCalculator() {
+            Object.values(inputs).forEach(input => {
+                if (input.id === 'gstRate') {
+                    input.value = '18';
+                } else if (input.id === 'profitMargin') {
+                    input.value = '20';
+                } else {
+                    input.value = '0';
+                }
+            });
+            calculatePrice();
+        }
+
+        // Add event listeners to all inputs
+        Object.values(inputs).forEach(input => {
+            input.addEventListener('input', calculatePrice);
+            input.addEventListener('keyup', calculatePrice);
+        });
+
+        // Initial calculation
+        calculatePrice();
+
+        // Add some visual feedback for inputs
+        Object.values(inputs).forEach(input => {
+            input.addEventListener('focus', function() {
+                this.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
